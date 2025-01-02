@@ -46,14 +46,10 @@ const SignupCard = () => {
      <Flex justifyContent="center" alignItems={"center"}>
       <Card.Root maxW={{base:"full" ,sm:"500px"}} borderWidth="1px" borderRadius="lg" p={2} pb={6}>
           <Card.Header>
-            <Flex direction="column" align="center">
-              <Card.Title fontSize="2xl" fontWeight="bold">Sign up</Card.Title>
-            </Flex>
-            <Flex direction="column" align="center">
-              <Card.Description color="gray.500" fontSize="sm">
-                Fill in the form below to create an account
-              </Card.Description>
-            </Flex>
+            <Card.Title textAlign={"center"} fontSize="2xl" fontWeight="bold">Sign up</Card.Title>
+            <Card.Description textAlign={"center"} color="gray.500" fontSize="sm">
+              Fill in the form below to create an account
+            </Card.Description>
           </Card.Header>
           <Card.Body>
             <Stack direction={['column','row']} gap={4} mb={4}>
