@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { RecoilRoot } from 'recoil'
 
 createRoot(document.getElementById('root')).render(
+  //In strict mode renders every component twice,on development on production renders only once
   <StrictMode>
     <RecoilRoot>
       <BrowserRouter>

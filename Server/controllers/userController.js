@@ -107,7 +107,7 @@ const followUnFollowUser = async (req, res) => {
     if(!userToModify || !currentUser){
       return res.status(404).json({error: "User not found"})
     }
-    const isFollowing = currentUser.followers.includes(id);
+    const isFollowing = currentUser.following.includes(id);
 
     if(isFollowing){
       //unfollow user
@@ -141,7 +141,7 @@ const updateUser = async (req,res) =>{
   const {name , email, username, password ,  bio} = req.body
   let {profilePic} = req.body
 
-  const userId = req.user._id
+  const userId = req.user._id 
   try{
     let user = await User.findById(userId);
     if(!user) return res.status(400).json({error: "User not found"})
@@ -172,8 +172,10 @@ const updateUser = async (req,res) =>{
     user.profilePic = profilePic || user.profilePic
     user.bio = bio || user.bio
 
-    await user.save()
-    res.status(200).json({message: "Profile updated successfully", user})
+    user = await user.save()
+
+    user.password = null;
+    res.status(200).json(user)
     
   }catch(error){
     res.status(500).json({error: error.message})

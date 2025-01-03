@@ -6,6 +6,7 @@ import { useRecoilState } from "recoil";
 import userAtom from "@/atom/userAtom";
 import usePreviewImg from "@/hooks/usePreviewImg";
 import useShowToast from "@/hooks/useShowToast";
+import { toaster } from "@/components/ui/toaster";
 
 const UpdateProfilePage = () => {
   const [user,setUser] = useRecoilState(userAtom)
@@ -21,8 +22,8 @@ const UpdateProfilePage = () => {
   const showToast = useShowToast()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    try{
+    e.preventDefault()    
+    const updateProfile = async () => {
       const res = await fetch(`/api/users/update/${user._id}`,{
         method: "PUT",
         headers: {
@@ -31,10 +32,28 @@ const UpdateProfilePage = () => {
         body: JSON.stringify({...inputs,profilePic:imgUrl})
       })
       const data = await res.json()
+      if(data.error){
+        showToast("Error",data.error,'error')
+        return
+      }
       console.log(data)
-    }catch(error){
-      showToast('Error',error,'error')
+      setUser(data)
+      localStorage.setItem("user-hives",JSON.stringify(data))
     }
+    toaster.promise(updateProfile(), {
+      loading:{
+        title:"Updating Profile",
+        description:"Please wait while we update your profile"
+      },
+      success:{
+        title:"Profile Updated",
+        description:"Your profile has been updated successfully"
+      },
+      error:{
+        title:"Update Failed",
+        description:"Something went wrong while updating your profile."
+      }
+    })
   }
 
   return (
@@ -81,7 +100,7 @@ const UpdateProfilePage = () => {
                 />
               </Field>
               <Field label="Bio">
-                <Input placeholder="your bio " type="email"
+                <Input placeholder="your bio " type="text"
                   value = {inputs.bio}
                   onChange={(e) => setinputs({...inputs,bio:e.target.value})}
                 />
