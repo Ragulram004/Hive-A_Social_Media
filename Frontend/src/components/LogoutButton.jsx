@@ -3,6 +3,7 @@ import { Button } from './ui/button'
 import { useSetRecoilState } from 'recoil'
 import userAtom from '@/atom/userAtom'
 import useShowToast from '@/hooks/useShowToast'
+import { IoMdLogOut } from "react-icons/io";
 
 
 const LogoutButton = () => {
@@ -38,10 +39,10 @@ const LogoutButton = () => {
       position = {"fixed"}
       top = {'30px'}
       right = {"30px"}
-      size = {"sm"}
+      size = {"md"}
       onClick = {handleLogout}
     >
-      Logout
+      <IoMdLogOut size={30} />
     </Button>
   )
 }
