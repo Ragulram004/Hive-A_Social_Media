@@ -1,52 +1,91 @@
-import React,{useState} from "react";
-import { Flex, Text, Image, Box } from "@chakra-ui/react";
+import React,{useEffect, useState} from "react";
+import { Flex, Text, Image, Box, Spinner } from "@chakra-ui/react";
 import { Avatar } from "@/components/ui/avatar";
 import { BsThreeDots } from "react-icons/bs";
 import Actions from "@/components/Actions";
 import Comment from "@/components/Comment";
 import { Button } from "@/components/ui/button";
+import useShowToast from "@/hooks/useShowToast";
+import useGetUserProfile from "@/hooks/useGetUserProfile";
+import { useParams } from "react-router-dom";
+import { MdOutlineDeleteOutline } from "react-icons/md";
+import { formatDistanceStrict } from "date-fns";
+import { useRecoilValue } from "recoil";
+import userAtom from "@/atom/userAtom";
+import useDeletePost from "@/hooks/useDeletePost";
 
 const PostPage = () => {
+  const {user,loading} = useGetUserProfile()
+  const showToast = useShowToast()
+  const [post,setPost] = useState(null)
+  const {pid} = useParams()
+  const currentUser = useRecoilValue(userAtom)
+  const {handleDeletePost} = useDeletePost()
 
-  const [liked, setLiked] = useState(false);
+  useEffect(() => {
+    const getPost = async()=>{
+      try{
+        const res = await fetch(`/api/posts/${pid}`)
+        const data = await res.json()
+        if(data.error){
+          showToast("Error",data.error,"error")
+          return
+        }
+        console.log(data)
+        setPost(data)
+      }catch(error){
+        showToast("Error",error.message,"error")
+      }
+    }  
+    getPost()
+  }, [pid])
+  
+  
 
+  if(!user && loading){
+    return(
+      <Flex justifyContent={"center"} alignItems={"center"} height={"80vh"}>
+        <Spinner size="xl" />
+      </Flex>
+    )
+  }
+
+  if(!post) return null
   return (
     <>
       <Flex>
           <Flex alignItems="center" gap={3} w="full">
-            <Avatar src='/zuck-avatar.png' size="md" name="Mark Zuckerberg" />
+            <Avatar src={user.profilePic} size="md" name="Mark Zuckerberg" />
             <Flex alignItems="center">
-              <Text fontSize="sm" fontWeight="bold">Mark Zuckerberg</Text>
+              <Text fontSize="sm" fontWeight="bold">
+                {user.username}
+              </Text>
               <Image src="/verified.png" w={4} h={4} ml={4} alt="Verified Badge" />
             </Flex>
           </Flex>
-          <Flex gap={4} alignItems="center"> 
-            <Text fontSize={"sm"} color={"gray.light"} >1d</Text>
-            <BsThreeDots/>
+          <Flex gap={4} alignItems={"center"}>
+            <Text fontSize={"xs"} color={"gray.light"} w={36} textAlign={"right"}>
+              {formatDistanceStrict(new Date(post.createdAt), new Date())}
+            </Text>
+            {currentUser?._id === user._id && <MdOutlineDeleteOutline cursor={"pointer"} size={18} onClick={()=>handleDeletePost(post._id)} />}
           </Flex>
       </Flex>
-      <Text my={3}>Let's talk about Hives</Text>
-      <Box
+      <Text my={3}>{post.text}</Text>
+      {post.img && <Box
         position={"relative"}
         borderRadius={6}
         overflow={"hidden"}
         border={"1px solid"}
         borderColor={"gray.light"}
       >
-        <Image src={"/post1.png"} w="full" />
-      </Box>
+        <Image src={post.img} w="full" />
+      </Box>}
 
       <Flex gap={3} my={3}>
-        <Actions liked={liked} setLiked={setLiked} />
+        <Actions post = {post} />
       </Flex>
 
-      <Flex gap={2} alignItems={"center"}>
-        <Text color={"gray.light"} fontSize={"sm"}>238 replies</Text>
-        <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"} ></Box>
-        <Text color={"gray.light"} fontSize={"sm"}>
-          {200 + (liked ? 1 : 0)} likes
-        </Text> 
-      </Flex>
+      
       <Box borderBottom={"1px solid"} borderColor={"gray.dark"} my={3}/>
       <Flex justifyContent={"space-between"}>
         <Flex gap={2} alignItems={"center"}>
@@ -56,27 +95,14 @@ const PostPage = () => {
         <Button variant="surface">Get</Button>
       </Flex>
       <Box borderBottom={"1px solid"} borderColor={"gray.dark"} my={3}/>
-      <Comment
-        comment = "Looks really good!"
-        createdAt = "2d"
-        likes = {100}
-        username = "johnpetterson"
-        userAvatar = "https://bit.ly/dan-abramov"
-      />
-      <Comment
-        comment = "useFull"
-        createdAt = "3d"
-        likes = {10}
-        username = "janedoe"
-        userAvatar = "https://bit.ly/sage-adebayo"
-      />
-      <Comment
-        comment = "nice content"
-        createdAt = "5d"
-        likes = {150}
-        username = "sallydoe"
-        userAvatar = "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04"
-      />
+      {post.replies.map((reply)=>(
+       <Comment
+        key={reply._id}
+        reply={reply}
+        lastReply = {reply._id === post.replies[post.replies.length - 1]._id}
+      /> 
+      ))}
+      
       
     </>
   );

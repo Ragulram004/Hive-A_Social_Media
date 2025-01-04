@@ -4,32 +4,39 @@ import UserPost from '@/components/UserPost'
 import { useParams } from 'react-router-dom'
 import useShowToast from '@/hooks/useShowToast'
 import { Flex, Spinner } from '@chakra-ui/react'
+import Post from '@/components/Post'
+import useGetUserProfile from '@/hooks/useGetUserProfile'
 
 const UserPage = () => {
-
-  const [user,setUser] = useState(null)
+  const {user,loading} = useGetUserProfile()
   const {username} = useParams()
   const showToast = useShowToast()
-  const [loading, setLoading] = useState(true)
+  const [posts,setPosts] = useState([])
+  const [fetchingPosts, setFetchingPosts] = useState(true)
 
   useEffect(()=>{
-    const getUser = async()=>{
+   
+    const getPosts = async() =>{
+      setFetchingPosts(true)
       try{
-        const res = await fetch(`/api/users/profile/${username}`)
+        const res = await fetch(`/api/posts/user/${username}`)
         const data = await res.json()
+        console.log(data)
         if(data.error){
           showToast("Error",data.error,"error")
           return
         }
-        setUser(data)
+        setPosts(data)
       }catch(error){
-        showToast("Error",error,"error")
+        showToast("Error",error.message,"error")
+        setPosts([])
       }finally{
-        setLoading(false)
+        setFetchingPosts(false)
       }
     }
-    getUser();
-  },[username,showToast])
+
+    getPosts();
+  },[username])
 
   if(!user && loading){
     return(
@@ -46,13 +53,22 @@ const UserPage = () => {
     )
   } 
   return (
-    <div>
+    <>
       <UserHeader user={user}/>
-      <UserPost likes={1200} replies={485} postImg="/post1.png" postTitle="Lets talk about threads."/>
-      <UserPost likes={548} replies={522} postImg="/post2.png" postTitle="What the hell."/>
-      <UserPost likes={4986} replies={852} postImg="/post3.png" postTitle="Click bait"/>
-      <UserPost likes={5465} replies={756} postTitle="First Hive"/>
-    </div>
+      {!fetchingPosts && posts.length === 0 && (
+        <Flex justifyContent={"center"} alignItems={"center"} height={"80vh"}>
+          <h1>No posts found</h1>
+        </Flex>
+      )}
+      {fetchingPosts && (
+        <Flex justifyContent={"center"} alignItems={"center"} height={"80vh"}>
+          <Spinner size="xl" />
+        </Flex>
+      )}
+      {posts.map((post) =>(
+        <Post key={post._id} post={post} postedBy={post.postedBy}/>
+      ))}
+    </>
   )
 }
 
