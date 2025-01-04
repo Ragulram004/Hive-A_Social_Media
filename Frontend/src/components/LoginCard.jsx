@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Card, Input, Stack, Flex, Text, Link } from "@chakra-ui/react"
+import { Button, Card, Input, Stack, Flex, Text, Link, Spinner } from "@chakra-ui/react"
 import { Field } from "@/components/ui/field"
 import { PasswordInput } from "./ui/password-input"
 import authScreenAtom from "@/atom/authAtom"
@@ -15,8 +15,10 @@ const SignupCard = () => {
     username:"",
     password:""
   })
+  const [loading,setLoading] = useState(false)
 
   const handlelogin = async() =>{
+    setLoading(true)
     try{
       const res = await fetch("/api/users/login",{
         method:"POST",
@@ -33,7 +35,9 @@ const SignupCard = () => {
       localStorage.setItem("user-hives",JSON.stringify(data))
       setUser(data)
     }catch(error){
-
+      showToast("Error",error,"error")
+    }finally{
+      setLoading(false)
     }
   }
   return (
@@ -65,7 +69,7 @@ const SignupCard = () => {
             <Button w={"full"} size={"sm"} variant="solid" colorScheme="blue"
              onClick={handlelogin}
             >
-              Login
+              {loading ? <Spinner size={"sm"} /> : "Login"}
             </Button>
           </Card.Footer>
           <Flex direction="column" align="center">

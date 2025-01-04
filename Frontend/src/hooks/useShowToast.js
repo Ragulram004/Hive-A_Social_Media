@@ -1,4 +1,3 @@
-import React from 'react'
 import { toaster } from '@/components/ui/toaster'
 
 const useShowToast = () => {

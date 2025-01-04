@@ -41,6 +41,7 @@ const LogoutButton = () => {
       right = {"30px"}
       size = {"md"}
       onClick = {handleLogout}
+      title = "Logout"
     >
       <IoMdLogOut size={30} />
     </Button>

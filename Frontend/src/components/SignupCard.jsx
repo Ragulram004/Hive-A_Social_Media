@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Card, Input, Stack, Flex, Text, Link } from "@chakra-ui/react"
+import { Button, Card, Input, Stack, Flex, Text, Link, Spinner } from "@chakra-ui/react"
 import { Field } from "@/components/ui/field"
 import { PasswordInput } from "./ui/password-input"
 import { useSetRecoilState } from "recoil"
@@ -18,8 +18,10 @@ const SignupCard = () => {
   })
   const showToast = useShowToast()
   const setUser = useSetRecoilState(userAtom)
+  const [loading,setLoading] = useState(false)
 
   const handleSignup = async() =>{
+    setLoading(true)
     try{
       const res = await fetch("/api/users/signup",{
         method:"POST",
@@ -37,7 +39,9 @@ const SignupCard = () => {
       localStorage.setItem("user-hives",JSON.stringify(data))
       setUser(data)
     }catch(error){
-      showToast(null,error,"error")
+      showToast("Error",error,"error")
+    }finally{
+      setLoading(false)
     }
   }
 
@@ -88,7 +92,7 @@ const SignupCard = () => {
               colorScheme="blue"
               onClick={handleSignup}
             >
-              Sign up
+              {loading ? <Spinner size={"sm"} /> : "Sign up"}
             </Button>
           </Card.Footer>
           <Flex direction="column" align="center">

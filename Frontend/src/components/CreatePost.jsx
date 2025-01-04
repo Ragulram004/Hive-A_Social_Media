@@ -1,5 +1,5 @@
 import React,{useRef, useState} from 'react'
-import { Input, Stack, Textarea,Text,Flex,Image } from "@chakra-ui/react"
+import { Input, Stack, Textarea,Text,Flex,Image,Spinner } from "@chakra-ui/react"
 import { Button } from './ui/button'
 import { IoMdAdd } from "react-icons/io";
 import {
@@ -19,6 +19,7 @@ import { useRecoilValue } from 'recoil';
 import userAtom from '@/atom/userAtom';
 import useShowToast from '@/hooks/useShowToast';
 
+
 const MAX_CHAR = 500
 
 const CreatePost = () => {
@@ -29,6 +30,7 @@ const CreatePost = () => {
   const [remainingChar, setRemainingChar] = useState(MAX_CHAR)
   const user = useRecoilValue(userAtom)
   const showToast = useShowToast()
+  const [loading, setLoading] = useState(false)
 
   const handleTextChange = (e) => {
     const inputText = e.target.value
@@ -43,30 +45,39 @@ const CreatePost = () => {
   }
 
   const handleCreatePost = async() => {
-    const res = await fetch("/api/posts/create",{
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        postedBy: user._id,
-        text: postText,
-        img: imgUrl
+    setLoading(true)
+    try{
+      const res = await fetch("/api/posts/create",{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          postedBy: user._id,
+          text: postText,
+          img: imgUrl
+        })
       })
-    })
-    const data = await res.json()
-    console.log(data)
-    if(data.error){
-      showToast("error",data.error,"error")
-      return
+      const data = await res.json()
+      console.log(data)
+      if(data.error){
+        showToast("Error",data.error,"error")
+        return
+      }
+      showToast("Success","Post created successfully","success")
+      setPostText("")
+      setImgUrl("")
+      setPopoverOpen(false);
+    }catch(error){
+      showToast("Error",error,"error")
+    }finally{
+      setLoading(false)
     }
-    showToast("Success","Post created successfully","success")
-    setPopoverOpen(false);
   }
 
   return (
     <>
-     <PopoverRoot open={isPopoverOpen} onOpenChange={setPopoverOpen}>
+     <PopoverRoot open={isPopoverOpen} >
       <PopoverTrigger asChild>
         <Button
           colorPalette = {"blue"}
@@ -75,6 +86,8 @@ const CreatePost = () => {
           bottom = {10}
           right = {10}
           size = {"md"}
+          onClick={() => setPopoverOpen(!isPopoverOpen)}
+          titile = {"Create Post"}
         >
           <IoMdAdd  /> Post
         </Button>
@@ -127,15 +140,15 @@ const CreatePost = () => {
               />
             </Flex>
           )}
-          <PopoverFooter >
+          <PopoverFooter>
             <Button variant="surface" size="xs" mt={4} w={"full"} fontSize="sm"
               onClick={handleCreatePost}
             >
-              Post
+              {loading ? <Spinner size="sm" /> : "Post"}
             </Button>
           </PopoverFooter>
         </PopoverBody>
-        <PopoverCloseTrigger />
+        <PopoverCloseTrigger onClick={() => setPopoverOpen(false)} />
       </PopoverContent>
     </PopoverRoot>
     </>
