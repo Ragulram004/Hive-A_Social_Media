@@ -1,11 +1,13 @@
+import postAtom from '@/atom/postAtom'
 import userAtom from '@/atom/userAtom'
 import { toaster } from '@/components/ui/toaster'
 import { useNavigate } from 'react-router-dom'
-import { useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 
 const useDeletePost = () => {
   const navigate = useNavigate()
   const user = useRecoilValue(userAtom)
+  const [posts,setPosts] = useRecoilState(postAtom)
 
   const handleDeletePost = async(id)=>{
       if(!window.confirm("Are you sure you want to delete this post?")) return
@@ -34,6 +36,7 @@ const useDeletePost = () => {
           description:"An error occurred while deleting the post"
         }
       })    
+      setPosts(posts.filter(post => post._id !== id))
       navigate(`/${user.username}`)
   }
   return {handleDeletePost}

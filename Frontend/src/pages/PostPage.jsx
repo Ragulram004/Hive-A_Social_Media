@@ -1,4 +1,4 @@
-import React,{useEffect, useState} from "react";
+import React,{useEffect} from "react";
 import { Flex, Text, Image, Box, Spinner } from "@chakra-ui/react";
 import { Avatar } from "@/components/ui/avatar";
 import { BsThreeDots } from "react-icons/bs";
@@ -10,17 +10,20 @@ import useGetUserProfile from "@/hooks/useGetUserProfile";
 import { useParams } from "react-router-dom";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { formatDistanceStrict } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "@/atom/userAtom";
 import useDeletePost from "@/hooks/useDeletePost";
+import postAtom from "@/atom/postAtom";
 
 const PostPage = () => {
   const {user,loading} = useGetUserProfile()
   const showToast = useShowToast()
-  const [post,setPost] = useState(null)
+  const [posts,setPosts] = useRecoilState(postAtom)
   const {pid} = useParams()
   const currentUser = useRecoilValue(userAtom)
   const {handleDeletePost} = useDeletePost()
+
+  const currentPost = posts?.[0]
 
   useEffect(() => {
     const getPost = async()=>{
@@ -32,13 +35,14 @@ const PostPage = () => {
           return
         }
         console.log(data)
-        setPost(data)
+        // since once post show at post page to handle that in recoil wrap the data is []
+        setPosts([data])
       }catch(error){
         showToast("Error",error.message,"error")
       }
     }  
     getPost()
-  }, [pid])
+  }, [pid,setPosts])
   
   
 
@@ -50,7 +54,7 @@ const PostPage = () => {
     )
   }
 
-  if(!post) return null
+  if(!currentPost) return null
   return (
     <>
       <Flex>
@@ -65,24 +69,24 @@ const PostPage = () => {
           </Flex>
           <Flex gap={4} alignItems={"center"}>
             <Text fontSize={"xs"} color={"gray.light"} w={36} textAlign={"right"}>
-              {formatDistanceStrict(new Date(post.createdAt), new Date())}
+              {formatDistanceStrict(new Date(currentPost.createdAt), new Date())}
             </Text>
-            {currentUser?._id === user._id && <MdOutlineDeleteOutline cursor={"pointer"} size={18} onClick={()=>handleDeletePost(post._id)} />}
+            {currentUser?._id === user._id && <MdOutlineDeleteOutline cursor={"pointer"} size={18} onClick={()=>handleDeletePost(currentPost._id)} />}
           </Flex>
       </Flex>
-      <Text my={3}>{post.text}</Text>
-      {post.img && <Box
+      <Text my={3}>{currentPost.text}</Text>
+      {currentPost.img && <Box
         position={"relative"}
         borderRadius={6}
         overflow={"hidden"}
         border={"1px solid"}
         borderColor={"gray.light"}
       >
-        <Image src={post.img} w="full" />
+        <Image src={currentPost.img} w="full" />
       </Box>}
 
       <Flex gap={3} my={3}>
-        <Actions post = {post} />
+        <Actions post = {currentPost} />
       </Flex>
 
       
@@ -95,11 +99,11 @@ const PostPage = () => {
         <Button variant="surface">Get</Button>
       </Flex>
       <Box borderBottom={"1px solid"} borderColor={"gray.dark"} my={3}/>
-      {post.replies.map((reply)=>(
+      {currentPost.replies.map((reply)=>(
        <Comment
         key={reply._id}
         reply={reply}
-        lastReply = {reply._id === post.replies[post.replies.length - 1]._id}
+        lastReply = {reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
       /> 
       ))}
       

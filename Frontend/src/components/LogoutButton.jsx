@@ -1,37 +1,13 @@
-import React from 'react'
 import { Button } from './ui/button'
-import { useSetRecoilState } from 'recoil'
-import userAtom from '@/atom/userAtom'
-import useShowToast from '@/hooks/useShowToast'
 import { IoMdLogOut } from "react-icons/io";
+import { Text } from '@chakra-ui/react'
+import useLogout from '@/hooks/useLogout'
 
 
 const LogoutButton = () => {
-  const setUser = useSetRecoilState(userAtom);
-  const showToast = useShowToast()
 
-  const handleLogout = async()=>{
-    try{
-      const res = await fetch("/api/users/logout",{
-        method:"POST",
-        headers :{
-          "Content-Type":"application/json"
-        },
-      })
-      const data = await res.json()
-      if(data.error){
-        showToast(null,data.error,"error")
-        return
-      }
-      //clear local storage      
-      localStorage.removeItem("user-hives");
-      //clear state
-      setUser(null) 
-    }catch(error){
-      showToast(null,error,"error")
-    }
-  }
-
+  const logout = useLogout()
+  
   return (
     <Button
       colorPalette = {"red"}
@@ -39,11 +15,11 @@ const LogoutButton = () => {
       position = {"fixed"}
       top = {'30px'}
       right = {"30px"}
-      size = {"md"}
-      onClick = {handleLogout}
+      size = {"sm"}
+      onClick = {logout}
       title = "Logout"
     >
-      <IoMdLogOut size={30} />
+      <IoMdLogOut size={30} /> <Text display={{base:"none",md:"block"}}>Logout</Text>
     </Button>
   )
 }

@@ -15,9 +15,11 @@ import {
 import { LuImageUp } from "react-icons/lu";
 import usePreviewImg from '@/hooks/usePreviewImg';
 import { CloseButton } from './ui/close-button';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState,useRecoilValue } from 'recoil';
 import userAtom from '@/atom/userAtom';
 import useShowToast from '@/hooks/useShowToast';
+import postAtom from '@/atom/postAtom';
+import { useParams } from 'react-router-dom';
 
 
 const MAX_CHAR = 500
@@ -31,6 +33,8 @@ const CreatePost = () => {
   const user = useRecoilValue(userAtom)
   const showToast = useShowToast()
   const [loading, setLoading] = useState(false)
+  const [posts,setPosts] = useRecoilState(postAtom)
+  const {username} = useParams()
 
   const handleTextChange = (e) => {
     const inputText = e.target.value
@@ -65,6 +69,9 @@ const CreatePost = () => {
         return
       }
       showToast("Success","Post created successfully","success")
+      if(username === user.username){
+        setPosts([data,...posts])
+      }
       setPostText("")
       setImgUrl("")
       setPopoverOpen(false);
@@ -85,11 +92,11 @@ const CreatePost = () => {
           position = {"fixed"}
           bottom = {10}
           right = {10}
-          size = {"md"}
+          size = {"sm"}
           onClick={() => setPopoverOpen(!isPopoverOpen)}
-          titile = {"Create Post"}
+          title = {"Create Post"}
         >
-          <IoMdAdd  /> Post
+          <IoMdAdd/> <Text display={{ base: "none", md: "block" }}>Post</Text>
         </Button>
       </PopoverTrigger>
       <PopoverContent w={{

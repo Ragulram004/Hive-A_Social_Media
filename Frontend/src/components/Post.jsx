@@ -7,7 +7,7 @@ import Actions from './Actions'
 import useShowToast from '@/hooks/useShowToast'
 import {formatDistanceStrict } from 'date-fns'
 import { MdOutlineDeleteOutline } from "react-icons/md";
-import { useRecoilValue } from 'recoil'
+import {  useRecoilValue } from 'recoil'
 import userAtom from '@/atom/userAtom'
 import { toaster } from './ui/toaster'
 import useDeletePost from '@/hooks/useDeletePost'
@@ -94,18 +94,19 @@ const Post = ({post,postedBy}) => {
           </Box>
         </Flex>
         <Flex flex={1} flexDirection={"column"} gap={2}>
-          <Link  to={`/${user.username}/post/${post._id}`} >
             <Flex flex={1} flexDirection={"column"} gap={2}>
               <Flex justifyContent={"space-between"} w={"full"}>
-                <Flex w={"full"} alignItems={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"bold"}
-                    onClick={(e)=>{
-                      e.preventDefault()
-                      navigate(`/${user.username}`)
-                    }}
-                  >{user?.username}</Text>
-                  <Image src='/verified.png' w={4} h={4} ml={1}/>
-                </Flex>
+                <Link  to={`/${user.username}/post/${post._id}`} >
+                  <Flex w={"full"} alignItems={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"bold"}
+                      onClick={(e)=>{
+                        e.preventDefault()
+                        navigate(`/${user.username}`)
+                      }}
+                      >{user?.username}</Text>
+                    <Image src='/verified.png' w={4} h={4} ml={1}/>
+                  </Flex>
+                </Link>
                 <Flex gap={4} alignItems={"center"}>
                   <Text fontSize={"xs"} color={"gray.light"} w={36} textAlign={"right"}>
                     {formatDistanceStrict(new Date(post.createdAt), new Date())}
@@ -113,20 +114,21 @@ const Post = ({post,postedBy}) => {
                   {currentUser?._id === user._id && <MdOutlineDeleteOutline cursor={"pointer"} size={18} onClick={()=> handleDeletePost(post._id)} />}
                 </Flex>
               </Flex>
-              <Text fontSize={"sm"}>{post.text}</Text>
-              {post.img &&(
-                <Box
+              <Link  to={`/${user.username}/post/${post._id}`} >
+              <Text fontSize={"sm"} marginBottom={2}>{post.text}</Text>
+                {post.img &&(
+                  <Box
                   position={"relative"}
                   borderRadius={6}
                   overflow={"hidden"}
                   border={"1px solid"}
                   borderColor={"gray.light"}
-                >
-                  <Image src={post.img} w="full" />
-                </Box>
-              )}
+                  >
+                    <Image src={post.img} w="full" />
+                  </Box>
+                )}
+              </Link>
             </Flex>
-          </Link>
           
           <Flex gap={3} my={1}>
             <Actions post={post}/>

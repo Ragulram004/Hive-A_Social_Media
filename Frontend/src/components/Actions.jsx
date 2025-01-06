@@ -5,10 +5,11 @@ import {
 	Flex,
 	Input,
 	Text,
-	useDisclosure,
+	Textarea,
+	Spinner,	
 } from "@chakra-ui/react";
 import { FormControl } from "@chakra-ui/form-control";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "@/atom/userAtom";
 import useShowToast from "@/hooks/useShowToast";
 import {
@@ -20,15 +21,18 @@ import {
   PopoverTrigger,
 	PopoverCloseTrigger,
 } from "@/components/ui/popover"
+import postAtom from "@/atom/postAtom";
 
 	
 
-const Actions = ({ post:post_ }) => {
+const Actions = ({ post }) => {
 	const user = useRecoilValue(userAtom)
 	const showToast = useShowToast()
-	const [liked, setLiked] = useState(post_.likes.includes(user?._id));
-	const [post,setPost] = useState(post_)
+	const [liked, setLiked] = useState(post.likes.includes(user?._id));
+	const [posts,setPosts] = useRecoilState(postAtom)
 	const [isLinking, setIsLinking] = useState(false)
+	const [reply,setReply] = useState("")	
+	const [isReplying,setIsReplying] = useState(false)
 	const commentRef = useRef(null)
 	
 	const handleLikeAndUnlike = async() => {
@@ -49,9 +53,22 @@ const Actions = ({ post:post_ }) => {
 			if(data.error) return showToast("Error",data.error,"error")
 			if(!liked){
 				//add the id of the current user to the post.likes array
-				setPost({...post,likes:[...post.likes,user._id]})
+				const updatedPosts = posts.map((p) =>{
+					if(p._id === post._id){
+						return {...p,likes:[...p.likes,user._id]}
+					}
+					return p
+				})
+				setPosts(updatedPosts)
 			}else{
-				setPost({...post,likes:post.likes.filter(id => id !== user._id)})
+				//remove the id of the current user from the post.likes
+				const updatedPosts = posts.map((p)=>{
+					if(p._id === post._id){
+						return {...p,likes:p.likes.filter((id)=>id !== user._id)}
+					}
+					return p;
+				})
+				setPosts(updatedPosts)
 			}
 			setLiked(!liked)
 		}catch(error){
@@ -60,6 +77,40 @@ const Actions = ({ post:post_ }) => {
 			setIsLinking(false)
 		}
 	}
+
+	const handleReply = async () => {
+		if (!user) return showToast("Error", "You need to be logged in to reply to a post", "error");
+		if (isReplying) return;
+		setIsReplying(true);
+		try {
+			const res = await fetch("/api/posts/reply/" + post._id, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ text: reply }),
+			});
+	
+			const data = await res.json();
+			if (data.error) return showToast("Error", data.error, "error");
+	
+			const updatedPosts = posts.map((p) => {
+				if (p._id === post._id) {
+					return { ...p, replies: [...p.replies, data] };
+				}
+				return p;
+			});
+	
+			setPosts(updatedPosts);
+			showToast("Success", "Reply added successfully", "success");
+			setReply("");
+		} catch (error) {
+			showToast("Error", error.message || "An unknown error occurred", "error");
+		} finally {
+			setIsReplying(false);
+		}
+	};
+	
 
 	return (
 		<>
@@ -90,7 +141,7 @@ const Actions = ({ post:post_ }) => {
 						role='img'
 						viewBox='0 0 24 24'
 						width='20'
-						onClick={(e) => {e.stopPropagation(); commentRef.current.click()}}
+						onClick={(e) => {e.preventDefault(); commentRef.current.click()}}
 					>
 						<title>Comment</title>
 						<path
@@ -117,17 +168,17 @@ const Actions = ({ post:post_ }) => {
 				<PopoverTrigger>
 					<Box as="button" ref={commentRef} style={{ display: "none" }} />
 				</PopoverTrigger>
-				<PopoverContent w={"full"}>
+				<PopoverContent w={"300px"}>
 					<PopoverArrow />
 					<PopoverBody border={"1px solid"} borderColor={"gray.light"} p={4} borderRadius={"7px"}>
 						{/* Content of the popover */}
-						<FormControl>
-						<PopoverTitle>
-							<Text>Leave a comment:</Text>
-						</PopoverTitle>
-							<Input placeholder="Write your comment..." />
-							<Button mt={2} size="sm" onClick={() => console.log("Submit comment")}>
-								Submit
+						<FormControl display={"flex"} flexDirection={"column"} gap={4}>
+							<PopoverTitle>
+								<Text fontWeight={"bold"}>Leave a reply:</Text>
+							</PopoverTitle>
+							<Textarea value={reply} onChange={(e) => setReply(e.target.value)} minH={"50px"} maxH={"100px"} placeholder="Write here..." />
+							<Button variant={"surface"} fontSize={"sm"} mt={2} size="sm" onClick={handleReply}>
+								{isReplying ? <Spinner/> : "Reply"}
 							</Button>
 						</FormControl>
 					</PopoverBody>
