@@ -59,9 +59,9 @@ const Header = () => {
 					<Link as={RouterLink} to={`/chat`}>
 						<BsFillChatQuoteFill size={20} />
 					</Link>
-					<Link as={RouterLink} to={`/settings`}>
+					{/* <Link as={RouterLink} to={`/settings`}>
 						<MdOutlineSettings size={20} />
-					</Link>					
+					</Link>					 */}
 					<IoMdLogOut size={23} onClick={logout} cursor={"pointer"} title="Logout" />
 					
 				</Flex>
