@@ -5,8 +5,10 @@ import { useRecoilState, useRecoilValue } from 'recoil'
 import userAtom from '@/atom/userAtom'
 import { BsCheck2All } from 'react-icons/bs'
 import { selectedConversationAtom } from '@/atom/messagesAtom'
+import { FaUser } from "react-icons/fa6";
 
-const Conversation = ({conversation}) => {
+
+const Conversation = ({conversation, isOnline}) => {
   const user = conversation.participants[0]
   const lastMessage = conversation.lastMessage
   const currentUser = useRecoilValue(userAtom)
@@ -30,21 +32,24 @@ const Conversation = ({conversation}) => {
         _id: conversation._id,
         userId: user._id,
         userProfilePic: user.profilePic,
-        username: user.username
+        username: user.username,
+        mock: conversation.mock
       })}
       bg={selectedConversation._id === conversation._id ? (colorMode === "light" ?"gray.400": "gray.dark") : ""}
     >
       <Box>
         <Avatar.Root  variant="subtle" size={"lg"}>
           <Avatar.Image src={user.profilePic} />
-          <Avatar.Fallback>{user.username.charAt(0).toUpperCase()}</Avatar.Fallback>
+          <Avatar.Fallback><FaUser /></Avatar.Fallback>
           <Float placement="bottom-end" offsetX="1" offsetY="1">
-            <Circle
-              bg="green.500"
-              size="8px"
-              outline="0.2em solid"
-              outlineColor="bg"
-            />
+            {isOnline &&
+              <Circle
+                bg="green.500"
+                size="8px"
+                outline="0.2em solid"
+                outlineColor="bg"
+              />
+            }
           </Float>
         </Avatar.Root>
       </Box>

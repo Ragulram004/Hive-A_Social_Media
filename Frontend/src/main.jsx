@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { Provider } from "./components/ui/provider"
 import { BrowserRouter } from 'react-router-dom'
 import { RecoilRoot } from 'recoil'
+import { SocketContextProvider } from './context/SocketContext'
 
 createRoot(document.getElementById('root')).render(
   //In strict mode renders every component twice,on development on production renders only once
@@ -12,7 +13,9 @@ createRoot(document.getElementById('root')).render(
     <RecoilRoot>
       <BrowserRouter>
         <Provider>
-          <App />
+          <SocketContextProvider>
+            <App />
+          </SocketContextProvider>
         </Provider>
       </BrowserRouter>
     </RecoilRoot>

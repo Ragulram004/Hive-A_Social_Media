@@ -1,5 +1,5 @@
 import { useState,useEffect } from "react"
-import { Box, Flex, Text, Input } from "@chakra-ui/react"
+import { Box, Flex, Text, Input, Spinner } from "@chakra-ui/react"
 import { MdPersonSearch } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import { Skeleton, SkeletonCircle } from "@/components/ui/skeleton";
@@ -8,8 +8,10 @@ import { useColorModeValue } from "@/components/ui/color-mode";
 import { GiConversation } from "react-icons/gi";
 import MessageContainer from "@/components/MessageContainer";
 import useShowToast from "@/hooks/useShowToast";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { conversationAtom, selectedConversationAtom } from "@/atom/messagesAtom";
+import userAtom from "@/atom/userAtom";
+import { useSocket } from "@/context/SocketContext";
 
 
 const ChatPage = () => {
@@ -17,6 +19,10 @@ const ChatPage = () => {
   const [loadingConversations,setLoadingConversations] = useState(true)
   const [conversations,setConversations] = useRecoilState(conversationAtom)
   const [selectedConversation,setSelectedConversation] = useRecoilState(selectedConversationAtom)
+  const [searchText,setSearchText] = useState("")
+  const [searchingUser, setSearchingUser] = useState(false)
+  const currentUser = useRecoilValue(userAtom)
+  const {socket,onlineUsers} = useSocket()
 
   useEffect(()=>{
     const getConversations = async()=>{
@@ -37,6 +43,57 @@ const ChatPage = () => {
     }
     getConversations()
   },[setConversations])
+
+  const handleConversationSearch = async(e)=>{
+    e.preventDefault()
+    setSearchingUser(true)
+    try{
+      const res = await fetch(`/api/users/profile/${searchText}`)
+      const searchUser = await res.json();
+      if(searchUser.error){
+        showToast("Error",searchUser.error,"error")
+        return
+      }
+
+      // if user try to message himself
+      if(searchUser._id === currentUser._id){
+        showToast("Error","You can't chat with yourself","error")
+        return
+      }
+      //if user already in converstion with
+      if(conversations.find(conversation => conversation.participants[0]._id === searchUser._id )){
+        setSelectedConversation({
+          _id: conversations.find(conversation => conversation.participants[0]._id === searchUser._id )._id,
+          userId: searchUser._id,
+          username: searchUser.username,
+          userProfilePic: searchUser.profilePic
+        })
+        return
+      }
+
+      const mockConversation = {
+				mock: true,
+				lastMessage: {
+					text: "",
+					sender: "",
+				},
+				_id: Date.now(),
+				participants: [
+					{
+						_id: searchUser._id,
+						username: searchUser.username,
+						profilePic: searchUser.profilePic,
+					},
+				],
+			};
+      setConversations((prevConvs) => [...prevConvs, mockConversation])  
+
+    }catch(error){
+      showToast("Error",error.message,"error")
+    }finally{
+      setSearchingUser(false)
+    }
+  }
 
   return (
     <Box position={"absolute"}  
@@ -73,11 +130,13 @@ const ChatPage = () => {
           <Text fontWeight={700} color={useColorModeValue("gray.600","gray.400")}>
             Your Conversations
           </Text>
-            <form>
+            <form onSubmit={handleConversationSearch}>
               <Flex alignItems={"center"} gap={2}>
-                <Input placeholder="Search a user"/>
-                <Button size={"sm"} variant={"surface"}>
-                  <MdPersonSearch size={20} />
+                <Input placeholder="Search a user"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)} />
+                <Button size={"sm"} variant={"surface"} onClick={handleConversationSearch}>
+                  {searchingUser ? <Spinner size={"sm"}/> : <MdPersonSearch size={20} />}
                 </Button>
               </Flex>
             </form>
@@ -96,7 +155,10 @@ const ChatPage = () => {
             )}
             {!loadingConversations && (
               conversations?.map(conversation=>(
-                <Conversation key={conversation._id} conversation={conversation}/>
+                <Conversation key={conversation._id} 
+                  isOnline ={onlineUsers.includes(conversation.participants[0]._id)}
+                  conversation={conversation}
+                />
               ))
             )}
         </Flex>

@@ -4,11 +4,12 @@ import { Avatar } from "./ui/avatar"
 import { Skeleton, SkeletonCircle } from "./ui/skeleton"
 import Message from "./Message"
 import MessageInput from "./MessageInput"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import useShowToast from "@/hooks/useShowToast"
-import { useRecoilState, useRecoilValue } from "recoil"
-import { selectedConversationAtom } from "@/atom/messagesAtom"
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
+import { conversationAtom, selectedConversationAtom } from "@/atom/messagesAtom"
 import userAtom from "@/atom/userAtom"
+import { useSocket } from "@/context/SocketContext"
 
 const MessageContainer = () => {
   const showToast = useShowToast()
@@ -16,12 +17,45 @@ const MessageContainer = () => {
   const [loadingMessages, setLoadingMessages] = useState(true)
   const [messages, setMessages] = useState([])
   const currentUser = useRecoilValue(userAtom)
+  const {socket} = useSocket()
+  const setConversations = useSetRecoilState(conversationAtom)
+  const messageEndRef = useRef(null)
+
+  useEffect(()=>{
+    socket.on("newMessage",(message) =>{
+      if(selectedConversation._id === message.conversationId){
+        setMessages((prevMessages) => [...prevMessages, message]);
+      }
+
+      setConversations((prevConvs) => {
+        const updatedConversations = prevConvs.map((conversation) => {
+          if(conversation._id === message.conversationId){
+            return{
+              ...conversation,
+              lastMessage: {
+                text: message.text,
+                sender: message.sender
+              }
+            }
+          }
+          return conversation
+        })
+        return updatedConversations
+      })
+    })
+    return () => socket.off("newMessage")
+  },[socket])
+
+  useEffect(()=>{
+    messageEndRef.current?.scrollIntoView({behavior:"smooth"})
+  },[messages])
  
   useEffect(()=>{
     const getMessages = async ()=>{
       setLoadingMessages(true)
       setMessages([])
       try{
+        if(selectedConversation.mock) return
         const res = await fetch(`/api/messages/${selectedConversation.userId}`)
         const data = await res.json()
         if(data.error){
@@ -82,11 +116,16 @@ const MessageContainer = () => {
         )}
         {!loadingMessages && (
           messages.map((message) => (
-            <Message key = {message._id} message  = {message} ownMessage={currentUser._id === message.sender} />
+            <Flex key={message._id}
+              direction={"column"}
+              ref = {messages.length -1 === messages.indexOf(message) ? messageEndRef : null}
+            >
+              <Message key = {message._id} message  = {message} ownMessage={currentUser._id === message.sender} />
+            </Flex>
           ))
         )}
       </Flex>
-      <MessageInput/>
+      <MessageInput setMessages = {setMessages}/>
     </Flex>
   )
 }
