@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
   bio:{
     type: String,
     default: ""
+  },
+  isDisabled:{
+    type: Boolean,
+    default: false
   }
 },{timestamps: true})
 
