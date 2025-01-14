@@ -11,6 +11,7 @@ import userAtom from './atom/userAtom'
 import UpdateProfilePage from './pages/UpdateProfilePage'
 import CreatePost from './components/CreatePost'
 import ChatPage from './pages/ChatPage'
+import SettingsPage from './components/SettingsPage'
 
 
 
@@ -20,7 +21,7 @@ function App() {
 
   return (
     <Box position={"relative"} w={"full"}>
-      <Container maxW={pathname === '/'? "900px":"620px"}>
+      <Container maxW={pathname === '/'? {base:"620px", md:"900px"}:"620px"}>
       <Toaster />
       <Header/>
       <Routes>
@@ -40,6 +41,7 @@ function App() {
         } />
         <Route path="/:username/post/:pid" element={<PostPage/>} />
         <Route path="/chat" element={user ? <ChatPage/>: <Navigate to="/auth" />} />
+        <Route path="/settings" element={user ? <SettingsPage/>: <Navigate to="/auth" />} />
       </Routes>     
 
       </Container>

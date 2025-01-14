@@ -1,9 +1,10 @@
 import { useEffect,useState } from "react"
-import { Flex,Spinner } from "@chakra-ui/react"
+import { Flex,Spinner, Box } from "@chakra-ui/react"
 import useShowToast from "@/hooks/useShowToast"
 import Post from "@/components/Post"
 import { useRecoilState } from "recoil"
 import postAtom from "@/atom/postAtom"
+import SuggestedUsers from "@/components/SuggestedUsers"
 
 const HomePage = () => {
   const[posts,setPosts] = useRecoilState(postAtom)
@@ -33,23 +34,34 @@ const HomePage = () => {
   },[setPosts])
   
   return (
-    <>
-      {!loading && posts.length === 0 && (
+    <Flex gap={10} alignItems={"flex-start"} >
+      <Box flex={"70%"}>
+        {!loading && posts.length === 0 && (
+            <Flex justifyContent={"center"} alignItems={"center"} height={"80vh"}>
+              <h1>Follow Other Users To See The Feed</h1>
+            </Flex>
+        )}
+        {loading && (
           <Flex justifyContent={"center"} alignItems={"center"} height={"80vh"}>
-            <h1>Follow Other Users To See The Feed</h1>
+            <Spinner size="xl" /> 
           </Flex>
-      )}
-      {loading && (
-        <Flex justifyContent={"center"} alignItems={"center"} height={"80vh"}>
-          <Spinner size="xl" /> 
-        </Flex>
-      )}
+        )}
 
-      {posts.map(post =>(
-        <Post key={post._id} post={post} postedBy={post.postedBy}/>
-      ))}
-
-    </>
+        {posts.map(post =>(
+          <Post key={post._id} post={post} postedBy={post.postedBy}/>
+        ))}
+      </Box>
+      <Box flex={"30%"} 
+        display={{
+          base : "none",
+          md : "block"
+        }}
+        position="sticky" // Makes the box sticky
+        top="80px" 
+      >
+        <SuggestedUsers/>
+      </Box>
+    </Flex>
   )
 }
 

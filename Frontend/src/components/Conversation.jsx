@@ -64,7 +64,7 @@ const Conversation = ({conversation, isOnline}) => {
               <BsCheck2All size={13}/>
             </Box>
           ) : ""}
-          {lastMessage?.text.length >18 ? lastMessage.text.substring(0,18) + "..." : lastMessage.text ||
+          {lastMessage?.text?.length >18 ? lastMessage.text.substring(0,18) + "..." : lastMessage.text ||
             <BsFillImageFill size={13}/>
           }
         </Text>

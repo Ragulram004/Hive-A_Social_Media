@@ -19,6 +19,10 @@ const useGetUserProfile = () => {
             showToast("Error",data.error,"error")
             return
           }
+          if(data.isDisabled){
+            setUser(null)
+            return
+          }
           setUser(data)
         }catch(error){
           showToast("Error",error.message,"error")
