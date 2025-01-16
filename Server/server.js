@@ -7,10 +7,17 @@ import postRoutes  from './routes/postRoutes.js'
 import messageRoutes  from './routes/messageRoutes.js'
 import { v2 as cloudinary } from 'cloudinary'; 
 import {app,server} from './socket/socket.js'
+import cors from 'cors'
 
 dotenv.config()
 
 connectDB()
+
+app.use(cors({
+    origin:"https://hive-ecru-six.vercel.app",
+    methods:"GET,POST,DELETE,PUT",
+    credentials:true
+  }));
 
 const PORT = process.env.PORT || 5000;
 
