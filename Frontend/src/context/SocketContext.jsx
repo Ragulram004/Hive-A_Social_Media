@@ -15,7 +15,7 @@ export const SocketContextProvider = ({children}) =>{
   const user = useRecoilValue(userAtom)
   
   useEffect(()=>{
-    const socket = io("https://hive-server-psi.vercel.app",{
+    const socket = io("http://localhost:5000",{
       query:{
         userId: user?._id
       }
@@ -28,7 +28,7 @@ export const SocketContextProvider = ({children}) =>{
     return ()=> socket && socket.close()
   },[user?._id])
   
-  console.log(onlineUsers)
+  // console.log(onlineUsers)
   return(
     <SocketContext.Provider value={{socket, onlineUsers}}>
       {children}

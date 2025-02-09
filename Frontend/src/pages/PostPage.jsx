@@ -34,7 +34,7 @@ const PostPage = () => {
           showToast("Error",data.error,"error")
           return
         }
-        console.log(data)
+        // console.log(data)
         // since once post show at post page to handle that in recoil wrap the data is []
         setPosts([data])
       }catch(error){

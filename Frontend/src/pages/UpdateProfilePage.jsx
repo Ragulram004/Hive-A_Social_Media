@@ -36,7 +36,7 @@ const UpdateProfilePage = () => {
         showToast("Error",data.error,'error')
         return
       }
-      console.log(data)
+      // console.log(data)
       setUser(data)
       localStorage.setItem("user-hives",JSON.stringify(data))
     }

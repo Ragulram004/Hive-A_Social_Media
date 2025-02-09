@@ -11,7 +11,7 @@ export default defineConfig({
     //Get rid of CORS error
     proxy:{
       "/api":{
-        target:"https://hive-server-psi.vercel.app",
+        target:"http://localhost:5000",
         changeOrigin:true,
         secure:false,
       }

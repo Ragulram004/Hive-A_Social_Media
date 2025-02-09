@@ -49,7 +49,7 @@ const Actions = ({ post }) => {
 				}
 			})
 			const data = await res.json()
-			console.log(data)
+			// console.log(data)
 			if(data.error) return showToast("Error",data.error,"error")
 			if(!liked){
 				//add the id of the current user to the post.likes array
