@@ -48,21 +48,21 @@ HIVE is a feature-rich social media platform designed to provide a seamless, eng
 
 1. **Clone the repository**  
    ```bash
-   git clone https://github.com/yourusername/hive.git
+   git clone https://github.com/Ragulram004/Hive-A_Social_Media.git
    cd hive
 
 2. **Backend Setup**  
    ```bash
    cd backend
    npm install
-   npm start
+   npm run dev
    ```
 
 3. **Frontend Setup**  
    ```bash
    cd frontend
    npm install
-   npm start
+   npm run dev
    ```
 
 4. **Environment Variables**  
