@@ -90,15 +90,6 @@ const PostPage = () => {
       </Flex>
 
       
-      <Box borderBottom={"1px solid"} borderColor={"gray.dark"} my={3}/>
-      <Flex justifyContent={"space-between"}>
-        <Flex gap={2} alignItems={"center"}>
-          <Text fontSize={"2xl"}>👋</Text>
-          <Text color={"gray.light"}>Get the app to like, reply and post</Text>
-        </Flex>
-        <Button variant="surface">Get</Button>
-      </Flex>
-      <Box borderBottom={"1px solid"} borderColor={"gray.dark"} my={3}/>
       {currentPost.replies.map((reply)=>(
        <Comment
         key={reply._id}
