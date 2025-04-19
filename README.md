@@ -80,5 +80,5 @@ HIVE is a feature-rich social media platform designed to provide a seamless, eng
      ```
      REACT_APP_API_URL=your_backend_url
      ```
-
+ 
 ---
